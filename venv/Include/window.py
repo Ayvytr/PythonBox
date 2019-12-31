@@ -1,25 +1,44 @@
 from tkinter import *
 import requests
+from GoogleFreeTrans import Translator
 
 
 class Window:
-    window = Tk()
-    et = Entry(window)
-    # performTranslate问题
-    btnTranslate = Button(window, text="翻译", command=lambda:performTranslate())
 
     def __init__(self):
-        self.window.geometry("800x640")
+        self.window = Tk()
+        width = 800
+        height = 640
+        self.window.geometry(str(width) + "x" + str(height))
         self.window.title("PyBox")
 
-        self.et.pack()
+        screenwidth = self.window.winfo_screenwidth()
+        screenheight = self.window.winfo_screenheight()
+        alignstr = '%dx%d+%d+%d' % (width, height, (screenwidth - width) / 2, (screenheight - height) / 2)
+        self.window.geometry(alignstr)
 
-        self.btnTranslate.pack()
+        self.etInput = Entry(self.window)
+        # self.etInput.pack()
+        self.etInput.grid(row=0,column=0, sticky='w', columnspan=10)
+
+        self.btnTranslate = Button(self.window, text=" 翻译 ", command=self.performTranslate)
+        self.btnTranslate.grid(row=0, column=1)
+        # self.btnTranslate.pack(side='right')
+
+        self.tvTranslate = Text(self.window)
+        # self.tvTranslate.pack()
+        self.tvTranslate.grid(row=1, column=0)
 
     def show(self):
         self.window.mainloop()
 
     def performTranslate(self):
-        url = "https://translate.google.cn/#view=home&op=translate&sl=zh-CN&tl=en&text="
-        response = requests.get(url)
-        return response
+        text = self.etInput.get()
+        if len(text) == 0:
+            return
+
+        translator = Translator.translator(src='en', dest='zh-CN')
+        value = translator.translate(text)
+
+        self.tvTranslate.delete(0.0, END)
+        self.tvTranslate.insert("insert", value)

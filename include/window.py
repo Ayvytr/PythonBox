@@ -4,9 +4,11 @@ from urllib.parse import quote, urlparse, parse_qs, urlunparse, parse_qsl, urlen
 from urllib.parse import unquote
 
 from GoogleFreeTrans import Translator
+from PyQt5 import Qt
 from PyQt5.QtWidgets import *
 from url_decode import urldecode
 
+from include.about_dialog import Ui_Dialog
 from include.mainwindow import Ui_MainWindow
 
 
@@ -32,6 +34,8 @@ class MainWindow():
         self.mainWindow.btnJson.clicked.connect(self.jsonFormat)
         self.mainWindow.btnUrlDecode.clicked.connect(self.urlDecode)
         self.mainWindow.btnUrlEncode.clicked.connect(self.urlEncode)
+
+        self.mainWindow.actionAbout.triggered.connect(self.about)
 
     def translateToChinese(self):
         text = self.mainWindow.etLeft.toPlainText()
@@ -117,4 +121,11 @@ class MainWindow():
             self.mainWindow.statusbar.showMessage(str(exception))
             return
 
-
+    def about(self):
+        # 有错误
+        dialog = QDialog
+        ui_dialog = Ui_Dialog()
+        ui_dialog.setupUi(dialog)
+        # dialog.setWindowModality(Qt.ApplicationModal)
+        dialog.exec_()
+        pass

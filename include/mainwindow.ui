@@ -178,14 +178,20 @@
     <property name="title">
      <string>帮助</string>
     </property>
-    <addaction name="action"/>
+    <addaction name="actionSourceCode"/>
+    <addaction name="actionAbout"/>
    </widget>
    <addaction name="menu_2"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="action">
+  <action name="actionAbout">
    <property name="text">
     <string>关于</string>
+   </property>
+  </action>
+  <action name="actionSourceCode">
+   <property name="text">
+    <string>查看源代码</string>
    </property>
   </action>
  </widget>

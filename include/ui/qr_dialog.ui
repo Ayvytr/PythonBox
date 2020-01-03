@@ -11,14 +11,14 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>二维码生成/解析</string>
   </property>
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>330</y>
-     <width>1004</width>
+     <y>320</y>
+     <width>741</width>
      <height>244</height>
     </rect>
    </property>
@@ -51,7 +51,7 @@
        </size>
       </property>
       <property name="text">
-       <string>解析</string>
+       <string>选择图片并解析</string>
       </property>
      </widget>
     </item>

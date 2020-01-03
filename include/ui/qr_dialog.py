@@ -15,7 +15,7 @@ class Ui_QrDialog(object):
         QrDialog.setObjectName("QrDialog")
         QrDialog.resize(776, 591)
         self.layoutWidget = QtWidgets.QWidget(QrDialog)
-        self.layoutWidget.setGeometry(QtCore.QRect(20, 330, 1004, 244))
+        self.layoutWidget.setGeometry(QtCore.QRect(20, 320, 741, 244))
         self.layoutWidget.setObjectName("layoutWidget")
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.layoutWidget)
         self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
@@ -85,8 +85,8 @@ class Ui_QrDialog(object):
 
     def retranslateUi(self, QrDialog):
         _translate = QtCore.QCoreApplication.translate
-        QrDialog.setWindowTitle(_translate("QrDialog", "Dialog"))
-        self.btnDecode.setText(_translate("QrDialog", "解析"))
+        QrDialog.setWindowTitle(_translate("QrDialog", "二维码生成/解析"))
+        self.btnDecode.setText(_translate("QrDialog", "选择图片并解析"))
         self.btnCopyResult.setText(_translate("QrDialog", "复制结果"))
         self.btnEncode.setText(_translate("QrDialog", "生成"))
         self.btnSavePhoto.setText(_translate("QrDialog", "保存图片"))

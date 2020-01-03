@@ -1,23 +1,19 @@
 import json
-import os
 import sys
-from urllib.parse import quote, urlparse, parse_qs, urlunparse, parse_qsl, urlencode
+import webbrowser
 from urllib.parse import unquote
+from urllib.parse import urlparse, parse_qs, urlencode
 
-import qrcode
-import zxing
 from GoogleFreeTrans import Translator
-from PIL import Image
-from PyQt5 import Qt, QtGui
-from PyQt5.QtCore import QTimer, QDateTime, QRectF
-from PyQt5.QtGui import QPixmap, QPalette, QColor
+from PyQt5.QtCore import QTimer, QDateTime
 from PyQt5.QtWidgets import *
-from pyzbar.pyzbar import decode
-from url_decode import urldecode
 
-from include.about_dialog import Ui_Dialog
-from include.mainwindow import Ui_MainWindow
-from include.qr_dialog import Ui_QrDialog
+from include.ui.about_dialog import Ui_Dialog
+from include.command import Command
+from include.const import Const
+from include.ui.exceptiondialog import ExceptionDialog
+from include.ui.mainwindow import Ui_MainWindow
+from include.ui.qrdialog import QrDialog
 
 
 class MainWindow():
@@ -47,100 +43,82 @@ class MainWindow():
         sys.exit(self.app.exec_())
 
     def registerEvent(self):
-        self.mainWindow.btnToChinese.clicked.connect(self.translateToChinese)
-        self.mainWindow.btnToEnglish.clicked.connect(self.translateToEnglish)
-        self.mainWindow.btnJson.clicked.connect(self.jsonFormat)
-        self.mainWindow.btnUrlDecode.clicked.connect(self.urlDecode)
-        self.mainWindow.btnUrlEncode.clicked.connect(self.urlEncode)
+        self.mainWindow.btnToChinese.clicked.connect(lambda: self.execCommand(Command.TO_CN))
+        self.mainWindow.btnToEnglish.clicked.connect(lambda: self.execCommand(Command.TO_EN))
+        self.mainWindow.btnJson.clicked.connect(lambda: self.execCommand(Command.JSON_FORMAT))
+        self.mainWindow.btnUrlDecode.clicked.connect(lambda: self.execCommand(Command.URL_DECODE))
+        self.mainWindow.btnUrlEncode.clicked.connect(lambda: self.execCommand(Command.URL_ENCODE))
 
         self.mainWindow.actionAbout.triggered.connect(self.about)
         self.mainWindow.actionGithub.triggered.connect(self.openGithub)
         self.mainWindow.actionIssue.triggered.connect(self.openIssue)
         self.mainWindow.actionQr.triggered.connect(self.showQrWindow)
 
-    def translateToChinese(self):
+    def execCommand(self, command: Command):
         text = self.mainWindow.etLeft.toPlainText()
         if len(text) == 0:
             self.mainWindow.statusbar.showMessage("Null!")
             return
 
+        try:
+            if command == Command.TO_CN:
+                self.translateToChinese(text)
+            elif command == Command.TO_EN:
+                self.translateToEnglish(text)
+            elif command == Command.JSON_FORMAT:
+                self.jsonFormat(text)
+            elif command == Command.URL_DECODE:
+                self.urlDecode(text)
+            elif command == Command.URL_ENCODE:
+                self.urlEncode(text)
+        except Exception as exception:
+            print(exception)
+            self.showExceptionDialog(exception)
+            pass
+
+    def translateToChinese(self, text):
         translator = Translator.translator(src='en', dest='zh-CN')
         value = translator.translate(text)
         self.mainWindow.etRight.setPlainText(value)
 
-    def translateToEnglish(self):
-        text = self.mainWindow.etLeft.toPlainText()
-        if len(text) == 0:
-            self.mainWindow.statusbar.showMessage("Null!")
-            return
-
+    def translateToEnglish(self, text):
         translator = Translator.translator(src='zh-CN', dest='en')
         value = translator.translate(text)
         self.mainWindow.etRight.setPlainText(value)
 
-    def jsonFormat(self):
-        text = self.mainWindow.etLeft.toPlainText()
-        if len(text) == 0:
-            self.mainWindow.statusbar.showMessage("Null!")
-            return
-
-        try:
-            value = json.dumps(text, indent=2)
-        except Exception as exception:
-            print(exception)
-            self.mainWindow.statusbar.showMessage(str(exception))
-
+    def jsonFormat(self, text):
+        value = json.dumps(text, indent=2)
         self.mainWindow.etRight.setPlainText(eval(value))
 
-    def urlDecode(self):
-        text = self.mainWindow.etLeft.toPlainText()
-        if len(text) == 0:
-            self.mainWindow.statusbar.showMessage("Null!")
-            return
+    def urlDecode(self, text):
+        result = urlparse(text)
+        qs = parse_qs(result.query)
+        if len(qs) == 0:
+            self.mainWindow.etRight.setPlainText(text)
+        else:
+            query = ""
+            for key, value in qs.items():
+                query += key + "=" + unquote(value[0]) + "&"
 
-        try:
-            result = urlparse(text)
-            qs = parse_qs(result.query)
-            if len(qs) == 0:
-                self.mainWindow.etRight.setPlainText(text)
-            else:
-                query = ""
-                for key, value in qs.items():
-                    query += key + "=" + unquote(value[0]) + "&"
+            if len(query) > 0:
+                query = query[0:-1]
+            url = text[0:text.find('?') + 1]
 
-                if len(query) > 0:
-                    query = query[0:-1]
-                url = text[0:text.find('?') + 1]
+            self.mainWindow.etRight.setPlainText(url + query)
 
-                self.mainWindow.etRight.setPlainText(url + query)
+    def urlEncode(self, text):
+        result = urlparse(text)
+        qs = parse_qs(result.query)
+        if len(qs) == 0:
+            self.mainWindow.etRight.setPlainText(text)
+        else:
+            map = {}
+            for key, value in qs.items():
+                map[key] = value[0]
+            encodeQuery = urlencode(map)
+            url = text[0:text.find('?') + 1]
 
-        except Exception as exception:
-            self.mainWindow.statusbar.showMessage(str(exception))
-            return
-
-    def urlEncode(self):
-        text = self.mainWindow.etLeft.toPlainText()
-        if len(text) == 0:
-            self.mainWindow.statusbar.showMessage("Null!")
-            return
-
-        try:
-            result = urlparse(text)
-            qs = parse_qs(result.query)
-            if len(qs) == 0:
-                self.mainWindow.etRight.setPlainText(text)
-            else:
-                map = {}
-                for key, value in qs.items():
-                    map[key] = value[0]
-                encodeQuery = urlencode(map)
-                url = text[0:text.find('?') + 1]
-
-                self.mainWindow.etRight.setPlainText(url + encodeQuery)
-
-        except Exception as exception:
-            self.mainWindow.statusbar.showMessage(str(exception))
-            return
+            self.mainWindow.etRight.setPlainText(url + encodeQuery)
 
     def about(self):
         self.aboutDialog = QDialog()
@@ -154,80 +132,16 @@ class MainWindow():
         self.aboutDialog.close()
 
     def showQrWindow(self):
-        self.qrQDialog = QDialog()
-        self.qrDialog = Ui_QrDialog()
-        self.qrDialog.setupUi(self.qrQDialog)
-        # dialog.btnOk.clicked.connect(self.aboutOk)
-        self.qrDialog.btnEncode.clicked.connect(self.encodeQrCode)
-        self.qrDialog.btnDecode.clicked.connect(self.decodeQrCode)
-        self.qrDialog.btnSavePhoto.clicked.connect(self.saveEncodeQrCode)
-        self.qrDialog.labelEncodeImage.setScaledContents(True)
-        self.qrDialog.labelEncodeImage.setAutoFillBackground(True)
-        self.qrDialog.labelImage.setScaledContents(True)
-        self.qrDialog.labelImage.setAutoFillBackground(True)
-
-        palette = QPalette()
-        palette.setColor(QPalette.Background, QColor(255, 255, 255))
-        self.qrDialog.labelEncodeImage.setPalette(palette)
-        self.qrDialog.labelImage.setPalette(palette)
-
-        self.qrQDialog.exec_()
-
-        pass
+        QrDialog().show()
 
     def openGithub(self):
+        webbrowser.open(Const.GITHUB)
         pass
 
     def openIssue(self):
+        webbrowser.open(Const.ISSUE)
         pass
 
-    def encodeQrCode(self):
-        filename = 'tempEncodeQr.png'
-        qr = qrcode.QRCode(
-            version=None,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=10,
-            border=1,
-        )
-
-        text = self.qrDialog.et.text()
-        if len(text) == 0:
-            return
-
-        qr.clear()
-        qr.add_data(text)
-        qr.make(fit=True)
-        self.imgEncode = qr.make_image()
-        self.imgEncode.save(filename)
-        self.qrDialog.labelEncodeImage.setPixmap(QtGui.QPixmap(filename))
-
-        if os.path.exists(filename):
-            os.remove(filename)
-
-    def saveEncodeQrCode(self):
-        try:
-            if self.imgEncode is not None:
-                fileName, fileType = QFileDialog.getSaveFileName(filter='Jpg (*.jpg);;Png (*.png)')
-                if len(fileName) > 0:
-                    self.imgEncode.save(fileName)
-        except AttributeError:
-            pass
-
-    def decodeQrCode(self):
-        fileName, fileType = QFileDialog.getOpenFileName(filter='Jpg (*.jpg);;Jpeg (*.jpeg);;Png (*.png);;Bmp (*.bmp);;All Files (*.*)')
-        if len(fileName) == 0:
-            return
-
-        img = QtGui.QPixmap(fileName)
-        print(img, img.isNull())
-            # .scaled(self.qrDialog.labelImage.width(),
-            #                                  self.qrDialog.labelImage.height())
-        self.qrDialog.labelImage.setPixmap(img)
-
-        value = decode(Image.open(fileName))
-        v = value[0].data.decode('utf-8')
-        self.qrDialog.etDecode.setText(v)
-
-
-
-
+    def showExceptionDialog(self, exception):
+        ExceptionDialog(exception).show()
+        pass

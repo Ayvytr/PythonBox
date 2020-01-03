@@ -2,10 +2,7 @@ from include.window import MainWindow
 
 
 def main():
-    try:
-        MainWindow().show()
-    except Exception as exception:
-        print(exception)
+    MainWindow().show()
 
 
 if __name__ == '__main__':

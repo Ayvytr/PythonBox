@@ -142,7 +142,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "PythonBox"))
         self.btnToChinese.setText(_translate("MainWindow", "翻译为中文"))
         self.btnToEnglish.setText(_translate("MainWindow", "翻译为英文"))
         self.btnJson.setText(_translate("MainWindow", "Json格式化"))

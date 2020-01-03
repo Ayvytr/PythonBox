@@ -1,16 +1,23 @@
 import json
+import os
 import sys
 from urllib.parse import quote, urlparse, parse_qs, urlunparse, parse_qsl, urlencode
 from urllib.parse import unquote
 
+import qrcode
+import zxing
 from GoogleFreeTrans import Translator
-from PyQt5 import Qt
-from PyQt5.QtCore import QTimer, QDateTime
+from PIL import Image
+from PyQt5 import Qt, QtGui
+from PyQt5.QtCore import QTimer, QDateTime, QRectF
+from PyQt5.QtGui import QPixmap, QPalette, QColor
 from PyQt5.QtWidgets import *
+from pyzbar.pyzbar import decode
 from url_decode import urldecode
 
 from include.about_dialog import Ui_Dialog
 from include.mainwindow import Ui_MainWindow
+from include.qr_dialog import Ui_QrDialog
 
 
 class MainWindow():
@@ -47,6 +54,9 @@ class MainWindow():
         self.mainWindow.btnUrlEncode.clicked.connect(self.urlEncode)
 
         self.mainWindow.actionAbout.triggered.connect(self.about)
+        self.mainWindow.actionGithub.triggered.connect(self.openGithub)
+        self.mainWindow.actionIssue.triggered.connect(self.openIssue)
+        self.mainWindow.actionQr.triggered.connect(self.showQrWindow)
 
     def translateToChinese(self):
         text = self.mainWindow.etLeft.toPlainText()
@@ -133,14 +143,91 @@ class MainWindow():
             return
 
     def about(self):
-        # 有错误
-        self.qdialog = QDialog()
+        self.aboutDialog = QDialog()
         dialog = Ui_Dialog()
-        dialog.setupUi(self.qdialog)
+        dialog.setupUi(self.aboutDialog)
         dialog.btnOk.clicked.connect(self.aboutOk)
-        self.qdialog.exec_()
+        self.aboutDialog.exec_()
         pass
 
     def aboutOk(self):
-        self.qdialog.close()
+        self.aboutDialog.close()
+
+    def showQrWindow(self):
+        self.qrQDialog = QDialog()
+        self.qrDialog = Ui_QrDialog()
+        self.qrDialog.setupUi(self.qrQDialog)
+        # dialog.btnOk.clicked.connect(self.aboutOk)
+        self.qrDialog.btnEncode.clicked.connect(self.encodeQrCode)
+        self.qrDialog.btnDecode.clicked.connect(self.decodeQrCode)
+        self.qrDialog.btnSavePhoto.clicked.connect(self.saveEncodeQrCode)
+        self.qrDialog.labelEncodeImage.setScaledContents(True)
+        self.qrDialog.labelEncodeImage.setAutoFillBackground(True)
+        self.qrDialog.labelImage.setScaledContents(True)
+        self.qrDialog.labelImage.setAutoFillBackground(True)
+
+        palette = QPalette()
+        palette.setColor(QPalette.Background, QColor(255, 255, 255))
+        self.qrDialog.labelEncodeImage.setPalette(palette)
+        self.qrDialog.labelImage.setPalette(palette)
+
+        self.qrQDialog.exec_()
+
+        pass
+
+    def openGithub(self):
+        pass
+
+    def openIssue(self):
+        pass
+
+    def encodeQrCode(self):
+        filename = 'tempEncodeQr.png'
+        qr = qrcode.QRCode(
+            version=None,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=1,
+        )
+
+        text = self.qrDialog.et.text()
+        if len(text) == 0:
+            return
+
+        qr.clear()
+        qr.add_data(text)
+        qr.make(fit=True)
+        self.imgEncode = qr.make_image()
+        self.imgEncode.save(filename)
+        self.qrDialog.labelEncodeImage.setPixmap(QtGui.QPixmap(filename))
+
+        if os.path.exists(filename):
+            os.remove(filename)
+
+    def saveEncodeQrCode(self):
+        try:
+            if self.imgEncode is not None:
+                fileName, fileType = QFileDialog.getSaveFileName(filter='Jpg (*.jpg);;Png (*.png)')
+                if len(fileName) > 0:
+                    self.imgEncode.save(fileName)
+        except AttributeError:
+            pass
+
+    def decodeQrCode(self):
+        fileName, fileType = QFileDialog.getOpenFileName(filter='Jpg (*.jpg);;Jpeg (*.jpeg);;Png (*.png);;Bmp (*.bmp);;All Files (*.*)')
+        if len(fileName) == 0:
+            return
+
+        img = QtGui.QPixmap(fileName)
+        print(img, img.isNull())
+            # .scaled(self.qrDialog.labelImage.width(),
+            #                                  self.qrDialog.labelImage.height())
+        self.qrDialog.labelImage.setPixmap(img)
+
+        value = decode(Image.open(fileName))
+        v = value[0].data.decode('utf-8')
+        self.qrDialog.etDecode.setText(v)
+
+
+
 

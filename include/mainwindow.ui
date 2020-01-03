@@ -198,9 +198,17 @@
     <property name="title">
      <string>帮助</string>
     </property>
-    <addaction name="actionSourceCode"/>
+    <addaction name="actionGithub"/>
+    <addaction name="actionIssue"/>
     <addaction name="actionAbout"/>
    </widget>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>工具</string>
+    </property>
+    <addaction name="actionQr"/>
+   </widget>
+   <addaction name="menu"/>
    <addaction name="menu_2"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -209,9 +217,19 @@
     <string>关于</string>
    </property>
   </action>
-  <action name="actionSourceCode">
+  <action name="actionGithub">
    <property name="text">
-    <string>查看源代码</string>
+    <string>GitHub</string>
+   </property>
+  </action>
+  <action name="actionQr">
+   <property name="text">
+    <string>二维码生成/解析</string>
+   </property>
+  </action>
+  <action name="actionIssue">
+   <property name="text">
+    <string>Issue</string>
    </property>
   </action>
  </widget>

@@ -5,6 +5,7 @@ from urllib.parse import unquote
 
 from GoogleFreeTrans import Translator
 from PyQt5 import Qt
+from PyQt5.QtCore import QTimer, QDateTime
 from PyQt5.QtWidgets import *
 from url_decode import urldecode
 
@@ -18,11 +19,21 @@ class MainWindow():
         self.window = QMainWindow()
         self.mainWindow = Ui_MainWindow()
         self.mainWindow.setupUi(self.window)
+        self.mainWindow.verticalLayout.addStretch()
+
+        self.qtimer = QTimer()
+        self.qtimer.timeout.connect(self.showTime)
+        self.qtimer.start(1000)
         # mainWindow.statusbar.showMessage("状态栏消息")
-        # self.label = QLabel()
-        # self.label.setText("label")
+        self.timeLabel = QLabel()
         # mainWindow.statusbar.addPermanentWidget(self.label)
         self.registerEvent()
+
+    def showTime(self):
+        self.mainWindow.statusbar.addPermanentWidget(self.timeLabel)
+        time = QDateTime.currentDateTime()
+        timeDisplay = time.toString("yyyy-MM-dd hh:mm:ss dddd")
+        self.timeLabel.setText(timeDisplay)
 
     def show(self):
         self.window.show()
@@ -123,9 +134,13 @@ class MainWindow():
 
     def about(self):
         # 有错误
-        dialog = QDialog
-        ui_dialog = Ui_Dialog()
-        ui_dialog.setupUi(dialog)
-        # dialog.setWindowModality(Qt.ApplicationModal)
-        dialog.exec_()
+        self.qdialog = QDialog()
+        dialog = Ui_Dialog()
+        dialog.setupUi(self.qdialog)
+        dialog.btnOk.clicked.connect(self.aboutOk)
+        self.qdialog.exec_()
         pass
+
+    def aboutOk(self):
+        self.qdialog.close()
+

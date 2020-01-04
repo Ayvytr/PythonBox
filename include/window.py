@@ -8,12 +8,12 @@ from GoogleFreeTrans import Translator
 from PyQt5.QtCore import QTimer, QDateTime
 from PyQt5.QtWidgets import *
 
-from include.ui.about_dialog import Ui_Dialog
+from include.about_dialog import Ui_Dialog
 from include.command import Command
 from include.const import Const
-from include.ui.exceptiondialog import ExceptionDialog
-from include.ui.mainwindow import Ui_MainWindow
-from include.ui.qrdialog import QrDialog
+from include.exceptiondialog import ExceptionDialog
+from include.mainwindow import Ui_MainWindow
+from include.qrdialog import QrDialog
 
 
 class MainWindow():

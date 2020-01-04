@@ -8,7 +8,7 @@ from PyQt5.QtGui import QPalette, QColor, QFont
 from PyQt5.QtWidgets import QDialog, QFileDialog, QToolTip
 from pyzbar.pyzbar import decode
 
-from include.ui.qr_dialog import Ui_QrDialog
+from include.qr_dialog import Ui_QrDialog
 
 
 class QrDialog():

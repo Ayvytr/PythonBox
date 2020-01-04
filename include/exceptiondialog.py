@@ -3,7 +3,7 @@ import webbrowser
 from PyQt5.QtWidgets import QDialog
 
 from include.const import Const
-from include.ui.exception_dialog import Ui_ExceptionDialog
+from include.exception_dialog import Ui_ExceptionDialog
 
 
 class ExceptionDialog:
